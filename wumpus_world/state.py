@@ -1,42 +1,51 @@
+# -*- coding: utf-8 -*-
 
+from collections import namedtuple
+from itertools import product
+from random import random, choice
 
 import garlicsim.data_structures
 
 
 class State(garlicsim.data_structures.State):
-    # This is your `State` subclass. Your state objects should contain all the
-    # information there is about a moment of time in your simulation.
-    
-    def __init__(self):
-        pass
-    
-    
-    def step(self):
-        # This function is the heart of your simpack. What it does is take an
-        # existing world state, and output the next world state.
-        #
-        # This is where all the crunching gets done. This function defines the
-        # laws of your simulation world.
-        # 
-        # The step function is one of the very few things that your simpack
-        # **must** define. Almost all of the other definitions are optional.
-        pass
-    
-        
-    #@staticmethod
-    #def create_root():
-        # In this function you create a root state. This usually becomes the
-        # first state in your simulation. You can make this function do
-        # something simple: For example, if you're simulating a Life cellular
-        # automata, you can make this function create an empty board.
-        #
-        # This function may take arguments, if you wish, to be used in making
-        # the state. For example, in a Life simulation you may want to specify
-        # the width and height of the board using arguments to this function.
-        #
-        # This function returns the newly-created state.
 
-    
+    def __init__(self, board=None):
+        self.board = board or self._initiate_board()
+        self.winning_prize = 1000
+        self.death_penalty = -1000
+        self.action_penalty = -1
+        self.arrow_penalty = -10
+
+    def _initiate_board(self):
+        board = {}
+        BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
+        board_size = 4
+        pit_probability = 0.2
+
+        is_pit = lambda: random() <= pit_probability
+        field_indices = list(product(xrange(board_size), repeat=2))
+
+        for indices in field_indices:
+            board[indices] = BoardTile(pit=is_pit(), wumpus=False, gold=False)
+
+        random_field_indices = lambda: choice(field_indices[1:])
+        wumpus = random_field_indices()
+        gold = random_field_indices()
+        board[wumpus] = board[wumpus]._replace(wumpus=True)
+        board[gold] = board[gold]._replace(gold=True)
+
+        return board
+
+
+    def step(self):
+        return State(board=self.board)
+
+
+    @staticmethod
+    def create_root():
+        return State()
+
+
     #@staticmethod
     #def create_messy_root():
         # In this function you create a messy root state. This usually becomes
@@ -52,8 +61,8 @@ class State(garlicsim.data_structures.State):
         # the width and height of the board using arguments to this function.
         #
         # This function returns the newly-created state.
-                                 
-    
+
+
     #def step_generator(self):
     #    yield None
     #    pass
@@ -61,12 +70,12 @@ class State(garlicsim.data_structures.State):
     # Do you want to use a step generator as your step function? If so, you may
     # uncomment the above and fill it in, and it will be used instead of the
     # normal step function.
-    # 
+    #
     # A step generator is similar to a regular step function: it takes a
     # starting state, and computes the next state. But it doesn't `return` it,
     # it `yield`s it. And then it doesn't exit, it just keeps on crunching and
     # yielding more states one by one.
-    # 
+    #
     # A step generator is useful when you want to set up some environment
     # and/or variables when you do your crunching. It can help you save
     # resources, because you won't have to do all that initialization every
@@ -74,5 +83,3 @@ class State(garlicsim.data_structures.State):
     #
     # (You may write your step generator to terminate at some point or to never
     # terminate-- Both ways are handled by `garlicsim`.)
-    
-    
