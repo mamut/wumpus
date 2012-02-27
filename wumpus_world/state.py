@@ -6,6 +6,7 @@ from random import random, choice
 
 import garlicsim.data_structures
 
+BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
 
 class State(garlicsim.data_structures.State):
 
@@ -18,12 +19,11 @@ class State(garlicsim.data_structures.State):
 
     def _initiate_board(self):
         board = {}
-        BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
         board_size = 4
         pit_probability = 0.2
 
         is_pit = lambda: random() <= pit_probability
-        field_indices = list(product(xrange(board_size), repeat=2))
+        field_indices = sorted(list(product(xrange(board_size), repeat=2)))
 
         for indices in field_indices:
             board[indices] = BoardTile(pit=is_pit(), wumpus=False, gold=False)
@@ -33,6 +33,7 @@ class State(garlicsim.data_structures.State):
         gold = random_field_indices()
         board[wumpus] = board[wumpus]._replace(wumpus=True)
         board[gold] = board[gold]._replace(gold=True)
+        print wumpus
 
         return board
 
