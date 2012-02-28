@@ -10,22 +10,26 @@ BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
 
 class State(garlicsim.data_structures.State):
 
-    def __init__(self, board=None):
-        self.board = board or self._initiate_board()
+    def __init__(self, board=None, player_pos=(0, 0), points=0):
         self.winning_prize = 1000
         self.death_penalty = -1000
         self.action_penalty = -1
         self.arrow_penalty = -10
+        self.board_size = 4
+
+        self.player_pos = player_pos
+        self.points = points
+        self.board = board or self._initiate_board()
 
     def _initiate_board(self):
         board = {}
-        board_size = 4
         pit_probability = 0.2
 
         is_pit = lambda: random() <= pit_probability
-        field_indices = sorted(list(product(xrange(board_size), repeat=2)))
+        field_indices = sorted(list(product(xrange(self.board_size), repeat=2)))
 
-        for indices in field_indices:
+        board[0,0] = BoardTile(pit=False, wumpus=False, gold=False)
+        for indices in field_indices[1:]:
             board[indices] = BoardTile(pit=is_pit(), wumpus=False, gold=False)
 
         random_field_indices = lambda: choice(field_indices[1:])
@@ -33,7 +37,6 @@ class State(garlicsim.data_structures.State):
         gold = random_field_indices()
         board[wumpus] = board[wumpus]._replace(wumpus=True)
         board[gold] = board[gold]._replace(gold=True)
-        print wumpus
 
         return board
 
