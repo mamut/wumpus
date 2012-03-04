@@ -1,3 +1,5 @@
+import math
+
 import wx
 
 import garlicsim_wx
@@ -64,9 +66,28 @@ class StateViewer(wx.Panel, garlicsim_wx.widgets.WorkspaceWidget):
                 gc.SetBrush(pit_brush)
                 gc.DrawEllipse(x + 5, y + 5, 40, 40)
 
-            def print_player():
+            def print_player(direction):
+
+                def print_dir():
+                    rotation = {
+                            'up': 0,
+                            'right': math.pi / 2,
+                            'down': math.pi,
+                            'left': 3 * math.pi / 2
+                        }[direction]
+                    gc.PushState()
+                    gc.Translate(x + 25, y + 25)
+                    gc.Rotate(rotation)
+                    gc.Translate(0, -10)
+                    gc.Rotate(math.pi / 4)
+                    dir_side = 20 / math.sqrt(2)
+                    gc.DrawRectangle(-dir_side / 2, -dir_side / 2,
+                            dir_side, dir_side)
+                    gc.PopState()
+
                 gc.SetPen(black_pen)
                 gc.SetBrush(white_brush)
+                print_dir()
                 gc.DrawRectangle(x + 15, y + 15, 20, 20)
 
             gc.SetPen(black_pen)
@@ -85,7 +106,7 @@ class StateViewer(wx.Panel, garlicsim_wx.widgets.WorkspaceWidget):
                 print_wumpus()
 
             if self.state.player_pos == pos:
-                print_player()
+                print_player(self.state.player_dir)
 
         for pos, board_tile in self.state.board.iteritems():
             print_board_tile(pos, board_tile)

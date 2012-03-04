@@ -18,6 +18,7 @@ class State(garlicsim.data_structures.State):
         self.board_size = 4
 
         self.player_pos = player_pos
+        self.player_dir = 'up'
         self.points = points
         self.board = board or self._initiate_board()
 
