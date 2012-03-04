@@ -11,7 +11,8 @@ BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
 class State(garlicsim.data_structures.State):
 
     def __init__(self, board=None, player_pos=(0, 0), points=0,
-            player_dir='up', bump=False):
+            player_dir='up', bump=False, player_has_arrow=True,
+            wumpus_dead=False, scream=False):
         self.winning_prize = 1000
         self.death_penalty = -1000
         self.action_penalty = -1
@@ -24,6 +25,9 @@ class State(garlicsim.data_structures.State):
         self.board = board or self._initiate_board()
 
         self.bump = bump
+        self.player_has_arrow = player_has_arrow
+        self.wumpus_dead = wumpus_dead
+        self.scream = scream
 
     def _initiate_board(self):
         board = {}
@@ -46,7 +50,7 @@ class State(garlicsim.data_structures.State):
 
     def next_state(self, *args, **kwargs):
 
-        if self.board[self.player_pos].wumpus:
+        if self.board[self.player_pos].wumpus and not self.wumpus_dead:
             raise garlicsim.misc.WorldEnded
 
         if self.board[self.player_pos].pit:
@@ -57,7 +61,10 @@ class State(garlicsim.data_structures.State):
                 'player_pos': self.player_pos,
                 'player_dir': self.player_dir,
                 'points': self.points - 1,
-                'bump': False
+                'bump': False,
+                'player_has_arrow': self.player_has_arrow,
+                'wumpus_dead': self.wumpus_dead,
+                'scream': False
             }
         defaults.update(kwargs)
         return State(**defaults)
@@ -80,8 +87,28 @@ class State(garlicsim.data_structures.State):
             }[self.player_dir]
         return self.next_state(player_dir=new_dir)
 
-    def shoot_arrow(self):
-        pass
+    def step_shoot_arrow(self):
+        if not self.player_has_arrow:
+            return self.next_state()
+
+        next_state = self.next_state(player_has_arrow=False)
+        next_state.points += self.arrow_penalty
+
+        x, y = self.player_pos
+        arrow_path = {
+                'up': [(x, k) for k in range(y, self.board_size)],
+                'left': [(k, y) for k in range(0, x)],
+                'down': [(x, k) for k in range(0, y)],
+                'right': [(k, y) for k in range(x, self.board_size)]
+            }[self.player_dir]
+
+        for pos in arrow_path:
+            if self.board[pos].wumpus:
+                next_state.wumpus_dead = True
+                next_state.scream = True
+                break
+
+        return next_state
 
     def step_go_forward(self):
         x, y = self.player_pos
@@ -98,7 +125,8 @@ class State(garlicsim.data_structures.State):
         else:
             next_state = self.next_state(bump=True)
 
-        if next_state.board[next_state.player_pos].wumpus:
+        if (next_state.board[next_state.player_pos].wumpus
+                and not next_state.wumpus_dead):
             next_state.points += self.death_penalty
 
         if next_state.board[next_state.player_pos].pit:

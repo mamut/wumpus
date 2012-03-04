@@ -102,7 +102,7 @@ class StateViewer(wx.Panel, garlicsim_wx.widgets.WorkspaceWidget):
             if board_tile.pit:
                 print_pit()
 
-            if board_tile.wumpus:
+            if board_tile.wumpus and not self.state.wumpus_dead:
                 print_wumpus()
 
             if self.state.player_pos == pos:
