@@ -116,12 +116,20 @@ class StateViewer(wx.Panel, garlicsim_wx.widgets.WorkspaceWidget):
             print_board_tile(pos, board_tile)
 
         def print_points():
-            dc.SetFont(wx.Font(20, wx.FONTFAMILY_DEFAULT,
+            dc.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT,
                 wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
             dc.DrawLabel(str(self.state.points),
                     wx.Rect(0, (client_height - 40), client_width, 40),
                     wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL)
 
+        def print_sensors():
+            dc.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT,
+                wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+            dc.DrawLabel(str(self.state.sensors()),
+                    wx.Rect(0, (client_height - 80), client_width, 40),
+                    wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL)
+
+        print_sensors()
         print_points()
 
     def on_size(self, event):

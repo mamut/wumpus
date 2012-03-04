@@ -158,6 +158,16 @@ class State(garlicsim.data_structures.State):
 
         return next_state
 
+    def sensors(self):
+        sensors = {
+                'breeze': False,
+                'glow': False,
+                'stink': False,
+                'scream': self.scream,
+                'bump': self.bump
+            }
+        return sensors
+
     def step(self):
         return State(board=self.board)
 
