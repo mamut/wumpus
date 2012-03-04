@@ -53,10 +53,10 @@ class State(garlicsim.data_structures.State):
 
     def next_state(self, *args, **kwargs):
 
-        if self.board[self.player_pos].wumpus and not self.wumpus_dead:
+        if self.current_field().wumpus and not self.wumpus_dead:
             raise garlicsim.misc.WorldEnded
 
-        if self.board[self.player_pos].pit:
+        if self.current_field().pit:
             raise garlicsim.misc.WorldEnded
 
         if self.game_won:
@@ -133,11 +133,10 @@ class State(garlicsim.data_structures.State):
         else:
             next_state = self.next_state(bump=True)
 
-        if (next_state.board[next_state.player_pos].wumpus
-                and not next_state.wumpus_dead):
+        if next_state.current_field().wumpus and not next_state.wumpus_dead:
             next_state.points += self.death_penalty
 
-        if next_state.board[next_state.player_pos].pit:
+        if next_state.current_field().pit:
             next_state.points += self.death_penalty
 
         return next_state
@@ -189,9 +188,16 @@ class State(garlicsim.data_structures.State):
     def current_field(self):
         return self.board[self.player_pos]
 
-    def step(self):
-        return State(board=self.board)
-
+    def act(self, action):
+        new_state = {
+                'forward': lambda: self.step_go_forward(),
+                'turn_left': lambda: self.step_turn_left(),
+                'turn_right': lambda: self.step_turn_right(),
+                'shoot': lambda: self.step_shoot_arrow(),
+                'grab': lambda: self.step_grab_gold(),
+                'climb': lambda: self.step_climb_out()
+            }[action]()
+        return new_state
 
     @staticmethod
     def create_root():
