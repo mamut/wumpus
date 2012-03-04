@@ -86,10 +86,10 @@ class State(garlicsim.data_structures.State):
             }[self.player_dir]()
 
         new_x, new_y = new_pos
-        if new_x >= self.board_size or new_y >= self.board_size:
-            next_state = self.next_state(bump=True)
-        else:
+        if (0 <= new_x < self.board_size) and (0 <= new_y < self.board_size):
             next_state = self.next_state(player_pos=new_pos)
+        else:
+            next_state = self.next_state(bump=True)
 
         return next_state
 
