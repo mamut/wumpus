@@ -166,6 +166,19 @@ class State(garlicsim.data_structures.State):
                 'scream': self.scream,
                 'bump': self.bump
             }
+        x, y = self.player_pos
+        x_range = [x - 1, x, x + 1]
+        y_range = [y - 1, y, y + 1]
+        surrounding_fields = product(x_range, y_range)
+        for field in surrounding_fields:
+            if field in self.board:
+                tile = self.board[field]
+                if tile.wumpus:
+                    sensors['stink'] = True
+                if tile.pit:
+                    sensors['breeze'] = True
+                if tile.gold and not self.gold_grabbed:
+                    sensors['glow'] = True
         return sensors
 
     def step(self):
