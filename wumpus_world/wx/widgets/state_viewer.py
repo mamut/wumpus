@@ -88,12 +88,16 @@ class StateViewer(wx.Panel, garlicsim_wx.widgets.WorkspaceWidget):
                 gc.SetPen(black_pen)
                 gc.SetBrush(white_brush)
                 print_dir()
+                if self.state.gold_grabbed:
+                    gc.SetBrush(gold_brush)
+                else:
+                    gc.SetBrush(white_brush)
                 gc.DrawRectangle(x + 15, y + 15, 20, 20)
 
             gc.SetPen(black_pen)
             if pos == (0, 0):
                 gc.SetBrush(start_brush)
-            elif board_tile.gold:
+            elif board_tile.gold and not self.state.gold_grabbed:
                 gc.SetBrush(gold_brush)
             else:
                 gc.SetBrush(background_brush)

@@ -12,7 +12,7 @@ class State(garlicsim.data_structures.State):
 
     def __init__(self, board=None, player_pos=(0, 0), points=0,
             player_dir='up', bump=False, player_has_arrow=True,
-            wumpus_dead=False, scream=False):
+            wumpus_dead=False, scream=False, gold_grabbed=False):
         self.winning_prize = 1000
         self.death_penalty = -1000
         self.action_penalty = -1
@@ -28,6 +28,7 @@ class State(garlicsim.data_structures.State):
         self.player_has_arrow = player_has_arrow
         self.wumpus_dead = wumpus_dead
         self.scream = scream
+        self.gold_grabbed = gold_grabbed
 
     def _initiate_board(self):
         board = {}
@@ -64,7 +65,8 @@ class State(garlicsim.data_structures.State):
                 'bump': False,
                 'player_has_arrow': self.player_has_arrow,
                 'wumpus_dead': self.wumpus_dead,
-                'scream': False
+                'scream': False,
+                'gold_grabbed': self.gold_grabbed
             }
         defaults.update(kwargs)
         return State(**defaults)
@@ -134,8 +136,11 @@ class State(garlicsim.data_structures.State):
 
         return next_state
 
-    def grab_gold(self):
-        pass
+    def step_grab_gold(self):
+        if self.board[self.player_pos].gold:
+            return self.next_state(gold_grabbed=True)
+        else:
+            return self.next_state()
 
     def climb_out(self):
         pass
