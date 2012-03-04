@@ -10,7 +10,7 @@ BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
 
 class State(garlicsim.data_structures.State):
 
-    def __init__(self, board=None, player_pos=(0, 0), points=0):
+    def __init__(self, board=None, player_pos=(0, 0), points=0, player_dir='up'):
         self.winning_prize = 1000
         self.death_penalty = -1000
         self.action_penalty = -1
@@ -18,7 +18,7 @@ class State(garlicsim.data_structures.State):
         self.board_size = 4
 
         self.player_pos = player_pos
-        self.player_dir = 'up'
+        self.player_dir = player_dir
         self.points = points
         self.board = board or self._initiate_board()
 
@@ -41,6 +41,52 @@ class State(garlicsim.data_structures.State):
 
         return board
 
+    def next_state(self, *args, **kwargs):
+        defaults = {
+                'board': self.board,
+                'player_pos': self.player_pos,
+                'player_dir': self.player_dir,
+                'points': self.points - 1
+            }
+        defaults.update(kwargs)
+        return State(**defaults)
+
+    def step_turn_left(self):
+        new_dir = {
+                'up': 'left',
+                'left': 'down',
+                'down': 'right',
+                'right': 'up'
+            }[self.player_dir]
+        return self.next_state(player_dir=new_dir)
+
+    def step_turn_right(self):
+        new_dir = {
+                'up': 'right',
+                'left': 'up',
+                'down': 'left',
+                'right': 'down'
+            }[self.player_dir]
+        return self.next_state(player_dir=new_dir)
+
+    def shoot_arrow(self):
+        pass
+
+    def step_go_forward(self):
+        x, y = self.player_pos
+        new_pos = {
+                'up': lambda: (x, y + 1),
+                'left': lambda: (x - 1, y),
+                'down': lambda: (x, y - 1),
+                'right': lambda: (x + 1, y)
+            }[self.player_dir]()
+        return self.next_state(player_pos=new_pos)
+
+    def grab_gold(self):
+        pass
+
+    def climb_out(self):
+        pass
 
     def step(self):
         return State(board=self.board)
