@@ -10,7 +10,8 @@ BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
 
 class State(garlicsim.data_structures.State):
 
-    def __init__(self, board=None, player_pos=(0, 0), points=0, player_dir='up'):
+    def __init__(self, board=None, player_pos=(0, 0), points=0,
+            player_dir='up', bump=False):
         self.winning_prize = 1000
         self.death_penalty = -1000
         self.action_penalty = -1
@@ -21,6 +22,8 @@ class State(garlicsim.data_structures.State):
         self.player_dir = player_dir
         self.points = points
         self.board = board or self._initiate_board()
+
+        self.bump = bump
 
     def _initiate_board(self):
         board = {}
@@ -46,7 +49,8 @@ class State(garlicsim.data_structures.State):
                 'board': self.board,
                 'player_pos': self.player_pos,
                 'player_dir': self.player_dir,
-                'points': self.points - 1
+                'points': self.points - 1,
+                'bump': False
             }
         defaults.update(kwargs)
         return State(**defaults)
@@ -80,7 +84,14 @@ class State(garlicsim.data_structures.State):
                 'down': lambda: (x, y - 1),
                 'right': lambda: (x + 1, y)
             }[self.player_dir]()
-        return self.next_state(player_pos=new_pos)
+
+        new_x, new_y = new_pos
+        if new_x >= self.board_size or new_y >= self.board_size:
+            next_state = self.next_state(bump=True)
+        else:
+            next_state = self.next_state(player_pos=new_pos)
+
+        return next_state
 
     def grab_gold(self):
         pass
