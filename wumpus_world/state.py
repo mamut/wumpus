@@ -45,6 +45,13 @@ class State(garlicsim.data_structures.State):
         return board
 
     def next_state(self, *args, **kwargs):
+
+        if self.board[self.player_pos].wumpus:
+            raise garlicsim.misc.WorldEnded
+
+        if self.board[self.player_pos].pit:
+            raise garlicsim.misc.WorldEnded
+
         defaults = {
                 'board': self.board,
                 'player_pos': self.player_pos,
@@ -90,6 +97,12 @@ class State(garlicsim.data_structures.State):
             next_state = self.next_state(player_pos=new_pos)
         else:
             next_state = self.next_state(bump=True)
+
+        if next_state.board[next_state.player_pos].wumpus:
+            next_state.points += self.death_penalty
+
+        if next_state.board[next_state.player_pos].pit:
+            next_state.points += self.death_penalty
 
         return next_state
 
