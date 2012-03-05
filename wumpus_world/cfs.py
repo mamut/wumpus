@@ -2,6 +2,7 @@
 
 from collections import namedtuple, defaultdict
 from random import choice
+from random import random as random_f
 
 Classifier = namedtuple('Classifier', 'condition, action')
 
@@ -57,6 +58,7 @@ class CFS(object):
     def evolve(self):
         new_population = []
         new_scores = defaultdict(int)
+        mutation_p = 0.01
         for x in xrange(self.population_size):
             first = choice(self.classifiers)
             second = choice(self.classifiers)
@@ -67,7 +69,27 @@ class CFS(object):
                 new_population.append(second)
                 new_scores[second] = self.scores[second]
 
-        self.classifiers = new_population
+        def mutate_cond(clf):
+            idx = choice(len(clf.condition))
+            condition = clf.condition[:]
+            condition[idx] = choice("01#")
+            return Classifier(condition=condition, action=clf.action)
+
+        def mutate_action(clf):
+            action = choice(self.action)
+            return Classifier(condition=clf.condition, action=action)
+
+        mutants = []
+        for clf in new_population:
+            if random_f() < mutation_p:
+                new_clf = mutate_cond(clf)
+                mutants.append(new_clf)
+        for clf in new_population:
+            if random_f() < mutation_p:
+                new_clf = mutate_action(clf)
+                mutants.append(new_clf)
+
+        self.classifiers = new_population + mutants
         self.scores = new_scores
 
     def message_fits_classifier(self, msg, clf):
