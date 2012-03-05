@@ -228,53 +228,17 @@ class State(garlicsim.data_structures.State):
     def shoot_to(self, direction):
         return self.turn_to(direction).step_shoot_arrow()
 
-    def step_rules(self):
-        try:
-            action = choice(self.actions().keys())
-            next_state = self.act(action)
-        except garlicsim.misc.WorldEnded:
-            next_state = State()
-        return next_state
+    def step_generator(self):
+        state = self
+        for k in xrange(2000):
+            try:
+                action = choice(self.actions().keys())
+                state = state.act(action)
+            except garlicsim.misc.WorldEnded:
+                state = State()
+            yield state
+        raise garlicsim.misc.WorldEnded
 
     @staticmethod
     def create_root():
         return State()
-
-
-    #@staticmethod
-    #def create_messy_root():
-        # In this function you create a messy root state. This usually becomes
-        # the first state in your simulation.
-        #
-        # Why messy? Because sometimes you want to have fun in your
-        # simulations. You want to create a world where there's a lot of mess,
-        # with many objects interacting with each other. This is a good way to
-        # test-drive your simulation.
-        #
-        # This function may take arguments, if you wish, to be used in making
-        # the state. For example, in a Life simulation you may want to specify
-        # the width and height of the board using arguments to this function.
-        #
-        # This function returns the newly-created state.
-
-
-    #def step_generator(self):
-    #    yield None
-    #    pass
-    #
-    # Do you want to use a step generator as your step function? If so, you may
-    # uncomment the above and fill it in, and it will be used instead of the
-    # normal step function.
-    #
-    # A step generator is similar to a regular step function: it takes a
-    # starting state, and computes the next state. But it doesn't `return` it,
-    # it `yield`s it. And then it doesn't exit, it just keeps on crunching and
-    # yielding more states one by one.
-    #
-    # A step generator is useful when you want to set up some environment
-    # and/or variables when you do your crunching. It can help you save
-    # resources, because you won't have to do all that initialization every
-    # time garlicsim computes a step.
-    #
-    # (You may write your step generator to terminate at some point or to never
-    # terminate-- Both ways are handled by `garlicsim`.)
