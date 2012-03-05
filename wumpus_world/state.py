@@ -15,7 +15,7 @@ class State(garlicsim.data_structures.State):
     def __init__(self, board=None, player_pos=(0, 0), points=0,
             player_dir='up', bump=False, player_has_arrow=True,
             wumpus_dead=False, scream=False, gold_grabbed=False,
-            game_won=False, shooting=False):
+            game_won=False, shooting=False, cfs=None):
         self.winning_prize = 1000
         self.death_penalty = -1000
         self.action_penalty = -1
@@ -34,6 +34,7 @@ class State(garlicsim.data_structures.State):
         self.gold_grabbed = gold_grabbed
         self.game_won = game_won
         self.shooting = shooting
+        self.cfs = cfs
 
     def _initiate_board(self):
         board = {}
@@ -76,7 +77,8 @@ class State(garlicsim.data_structures.State):
                 'scream': False,
                 'gold_grabbed': self.gold_grabbed,
                 'game_won': self.game_won,
-                'shooting': False
+                'shooting': False,
+                'cfs': self.cfs
             }
         defaults.update(kwargs)
         return State(**defaults)
@@ -247,17 +249,18 @@ class State(garlicsim.data_structures.State):
 
     def step_generator(self):
         state = self
-        cfs = CFS(sensors=state.sensors().keys(),
+        if self.cfs is None:
+            self.cfs = CFS(sensors=state.sensors().keys(),
                 actions=state.actions().keys())
         for k in xrange(2000):
-            cfs.add_message(state.sensors_msg())
-            action = cfs.get_action()
+            self.cfs.add_message(state.sensors_msg())
+            action = self.cfs.get_action()
             try:
                 state = state.act(action)
             except garlicsim.misc.WorldEnded:
-                cfs.clear_messages()
-                cfs.give_feedback(state.points)
-                cfs.evolve()
+                self.cfs.clear_messages()
+                self.cfs.give_feedback(state.points)
+                self.cfs.evolve()
                 state = State()
             yield state
         raise garlicsim.misc.WorldEnded
