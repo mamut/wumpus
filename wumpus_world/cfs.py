@@ -82,7 +82,7 @@ class CFS(object):
             crossovers.append(crossover(first, second))
 
         def mutate_cond(clf):
-            idx = choice(len(clf.condition))
+            idx = choice(xrange(len(clf.condition)))
             condition = clf.condition[:]
             condition[idx] = choice("01#")
             return Classifier(condition=condition, action=clf.action)
