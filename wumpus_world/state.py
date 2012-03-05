@@ -218,7 +218,7 @@ class State(garlicsim.data_structures.State):
         if diff == 1:
             return self.step_turn_right()
         if diff == 2:
-            return self.step_turn_right().step_self_turn_right()
+            return self.step_turn_right().step_turn_right()
         if diff == 3:
             return self.step_turn_left()
 
@@ -227,6 +227,14 @@ class State(garlicsim.data_structures.State):
 
     def shoot_to(self, direction):
         return self.turn_to(direction).step_shoot_arrow()
+
+    def step_rules(self):
+        try:
+            action = choice(self.actions().keys())
+            next_state = self.act(action)
+        except garlicsim.misc.WorldEnded:
+            next_state = State()
+        return next_state
 
     @staticmethod
     def create_root():

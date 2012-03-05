@@ -14,11 +14,12 @@ def app():
     messages = []
     print sensors()
     print actions()
+    state = State()
     while True:
         try:
-            pass
+            state = state.step_rules()
         except WorldEnded:
-            pass
+            state = State()
 
 if __name__ == "__main__":
     app()
