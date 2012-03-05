@@ -204,13 +204,7 @@ class State(garlicsim.data_structures.State):
         return actions
 
     def act(self, action):
-        new_state = self.actions()[action]()
-        return new_state
-
-    def step_rules(self):
-        rules = [
-            [(None, ), '', 0]
-        ]
+        return self.actions()[action]()
 
     def turn_to(self, direction):
         directions = {'up': 0, 'left': 1, 'down': 2, 'right': 3}
