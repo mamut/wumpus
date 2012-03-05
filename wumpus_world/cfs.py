@@ -9,7 +9,7 @@ Classifier = namedtuple('Classifier', 'condition, action')
 class CFS(object):
 
     def __init__(self, sensors=None, actions=None):
-        self.population_size = 40
+        self.population_size = 80
         self.sensors = sorted(sensors or [])
         self.actions = sorted(actions or [])
         self.messages = []
@@ -59,7 +59,7 @@ class CFS(object):
         new_population = []
         new_scores = defaultdict(int)
         mutation_p = 0.01
-        for x in xrange(self.population_size):
+        for x in xrange(self.population_size - 40):
             first = choice(self.classifiers)
             second = choice(self.classifiers)
             if self.scores[first] >= self.scores[second]:
@@ -68,6 +68,18 @@ class CFS(object):
             else:
                 new_population.append(second)
                 new_scores[second] = self.scores[second]
+
+        def crossover(first, second):
+            idx = choice(len(first.condition))
+            condition = first[:idx] + second[idx:]
+            action = choice([first.action, second.action])
+            return Classifier(condition=condition, action=action)
+
+        crossovers = []
+        for x in xrange(self.population_size - len(new_population)):
+            first = choice(new_population)
+            second = choice(new_population)
+            crossovers.append(crossover(first, second))
 
         def mutate_cond(clf):
             idx = choice(len(clf.condition))
@@ -89,7 +101,7 @@ class CFS(object):
                 new_clf = mutate_action(clf)
                 mutants.append(new_clf)
 
-        self.classifiers = new_population + mutants
+        self.classifiers = new_population + + crossovers + mutants
         self.scores = new_scores
 
     def message_fits_classifier(self, msg, clf):
