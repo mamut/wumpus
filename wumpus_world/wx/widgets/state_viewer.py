@@ -115,6 +115,31 @@ class StateViewer(wx.Panel, garlicsim_wx.widgets.WorkspaceWidget):
         for pos, board_tile in self.state.board.iteritems():
             print_board_tile(pos, board_tile)
 
+        def draw_arrow():
+            x, y = self.state.player_pos
+            end_x = {
+                'up': x, 'left': 0,
+                'down': x, 'right': self.state.board_size -1
+            }[self.state.player_dir]
+            end_y = {
+                'up': self.state.board_size - 1, 'left': y,
+                'down': 0, 'right': y
+            }[self.state.player_dir]
+
+            gc.SetPen(red_pen)
+            def draw_line(x1, y1, x2, y2):
+                x = min(x1, x2)
+                y = min(y1, y2)
+                w = max(abs(x1 - x2), 2)
+                h = max(abs(y1 - y2), 2)
+                gc.DrawRectangle(x, y, w, h)
+
+            draw_line(x * 50 + 25, (board_size - y - 1) * 50 + 25,
+                    end_x * 50 + 25, (board_size - end_y - 1) * 50 + 25)
+
+        if self.state.shooting:
+            draw_arrow()
+
         def print_points():
             dc.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT,
                 wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))

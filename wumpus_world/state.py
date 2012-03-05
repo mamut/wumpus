@@ -4,6 +4,8 @@ from collections import namedtuple
 from itertools import product
 from random import random, choice
 
+from cfs import CFS
+
 import garlicsim.data_structures
 
 BoardTile = namedtuple('BoardTile', 'pit, wumpus, gold')
@@ -13,7 +15,7 @@ class State(garlicsim.data_structures.State):
     def __init__(self, board=None, player_pos=(0, 0), points=0,
             player_dir='up', bump=False, player_has_arrow=True,
             wumpus_dead=False, scream=False, gold_grabbed=False,
-            game_won=False):
+            game_won=False, shooting=False):
         self.winning_prize = 1000
         self.death_penalty = -1000
         self.action_penalty = -1
@@ -31,6 +33,7 @@ class State(garlicsim.data_structures.State):
         self.scream = scream
         self.gold_grabbed = gold_grabbed
         self.game_won = game_won
+        self.shooting = shooting
 
     def _initiate_board(self):
         board = {}
@@ -72,7 +75,8 @@ class State(garlicsim.data_structures.State):
                 'wumpus_dead': self.wumpus_dead,
                 'scream': False,
                 'gold_grabbed': self.gold_grabbed,
-                'game_won': self.game_won
+                'game_won': self.game_won,
+                'shooting': False
             }
         defaults.update(kwargs)
         return State(**defaults)
@@ -115,6 +119,9 @@ class State(garlicsim.data_structures.State):
                 next_state.wumpus_dead = True
                 next_state.scream = True
                 break
+
+        if self.player_has_arrow:
+            next_state.shooting = True
 
         return next_state
 
@@ -185,6 +192,16 @@ class State(garlicsim.data_structures.State):
 
         return sensors
 
+    def sensors_msg(self):
+        sensors = self.sensors()
+        message = "10" #input message
+        for key in sorted(sensors.keys()):
+            if sensors[key]:
+                message += '1'
+            else:
+                message += '0'
+        return message
+
     def current_field(self):
         return self.board[self.player_pos]
 
@@ -230,11 +247,17 @@ class State(garlicsim.data_structures.State):
 
     def step_generator(self):
         state = self
+        cfs = CFS(sensors=state.sensors().keys(),
+                actions=state.actions().keys())
         for k in xrange(2000):
+            cfs.add_message(state.sensors_msg())
+            action = cfs.get_action()
             try:
-                action = choice(self.actions().keys())
                 state = state.act(action)
             except garlicsim.misc.WorldEnded:
+                cfs.clear_messages()
+                cfs.give_feedback(state.points)
+                cfs.evolve()
                 state = State()
             yield state
         raise garlicsim.misc.WorldEnded
