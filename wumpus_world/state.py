@@ -175,7 +175,7 @@ class State(garlicsim.data_structures.State):
         for field in adjacent_fields:
             if field in self.board:
                 tile = self.board[field]
-                if tile.wumpus:
+                if tile.wumpus and not self.wumpus_dead:
                     sensors['stink'] = True
                 if tile.pit:
                     sensors['breeze'] = True
