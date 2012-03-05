@@ -88,7 +88,7 @@ class CFS(object):
             return Classifier(condition=condition, action=clf.action)
 
         def mutate_action(clf):
-            action = choice(self.action)
+            action = choice(self.actions)
             return Classifier(condition=clf.condition, action=action)
 
         mutants = []
