@@ -190,10 +190,14 @@ class State(garlicsim.data_structures.State):
 
     def actions(self):
         actions = {
-            'forward': lambda: self.step_go_forward(),
-            'turn_left': lambda: self.step_turn_left(),
-            'turn_right': lambda: self.step_turn_right(),
-            'shoot': lambda: self.step_shoot_arrow(),
+            'go_up': lambda: self.go('up'),
+            'go_left': lambda: self.go('left'),
+            'go_down': lambda: self.go('down'),
+            'go_right': lambda: self.go('right'),
+            'shoot_up': lambda: self.shoot_to('up'),
+            'shoot_left': lambda: self.shoot_to('left'),
+            'shoot_down': lambda: self.shoot_to('down'),
+            'shoot_right': lambda: self.shoot_to('right'),
             'grab': lambda: self.step_grab_gold(),
             'climb': lambda: self.step_climb_out()
         }
@@ -202,6 +206,33 @@ class State(garlicsim.data_structures.State):
     def act(self, action):
         new_state = self.actions()[action]()
         return new_state
+
+    def step_rules(self):
+        rules = [
+            [(None, ), '', 0]
+        ]
+
+    def turn_to(self, direction):
+        directions = {'up': 0, 'left': 1, 'down': 2, 'right': 3}
+        curr_idx = directions[self.player_dir]
+        new_idx = directions[direction]
+
+        diff = (new_idx - curr_idx) % 4
+
+        if diff == 0:
+            return self
+        if diff == 1:
+            return self.step_turn_right()
+        if diff == 2:
+            return self.step_turn_right().step_self_turn_right()
+        if diff == 3:
+            return self.step_turn_left()
+
+    def go(self, direction):
+        return self.turn_to(direction).step_go_forward()
+
+    def shoot_to(self, direction):
+        return self.turn_to(direction).step_shoot_arrow()
 
     @staticmethod
     def create_root():
