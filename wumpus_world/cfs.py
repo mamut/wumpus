@@ -70,7 +70,7 @@ class CFS(object):
                 new_scores[second] = self.scores[second]
 
         def crossover(first, second):
-            idx = choice(len(first.condition))
+            idx = choice(xrange(len(first.condition)))
             condition = first[:idx] + second[idx:]
             action = choice([first.action, second.action])
             return Classifier(condition=condition, action=action)
