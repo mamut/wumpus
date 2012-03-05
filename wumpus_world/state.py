@@ -211,7 +211,7 @@ class State(garlicsim.data_structures.State):
         curr_idx = directions[self.player_dir]
         new_idx = directions[direction]
 
-        diff = (new_idx - curr_idx) % 4
+        diff = (curr_idx - new_idx) % 4
 
         if diff == 0:
             return self
