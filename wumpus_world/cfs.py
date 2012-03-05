@@ -83,8 +83,7 @@ class CFS(object):
 
         def mutate_cond(clf):
             idx = choice(xrange(len(clf.condition)))
-            condition = clf.condition[:]
-            condition[idx] = choice("01#")
+            condition = str(clf.condition[:idx]) + choice(["0", "1", "#"]) + str(clf.condition[idx+1:])
             return Classifier(condition=condition, action=clf.action)
 
         def mutate_action(clf):
