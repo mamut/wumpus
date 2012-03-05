@@ -101,7 +101,7 @@ class CFS(object):
                 new_clf = mutate_action(clf)
                 mutants.append(new_clf)
 
-        self.classifiers = new_population + + crossovers + mutants
+        self.classifiers = new_population + crossovers + mutants
         self.scores = new_scores
 
     def message_fits_classifier(self, msg, clf):
