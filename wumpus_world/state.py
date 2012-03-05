@@ -188,15 +188,19 @@ class State(garlicsim.data_structures.State):
     def current_field(self):
         return self.board[self.player_pos]
 
+    def actions(self):
+        actions = {
+            'forward': lambda: self.step_go_forward(),
+            'turn_left': lambda: self.step_turn_left(),
+            'turn_right': lambda: self.step_turn_right(),
+            'shoot': lambda: self.step_shoot_arrow(),
+            'grab': lambda: self.step_grab_gold(),
+            'climb': lambda: self.step_climb_out()
+        }
+        return actions
+
     def act(self, action):
-        new_state = {
-                'forward': lambda: self.step_go_forward(),
-                'turn_left': lambda: self.step_turn_left(),
-                'turn_right': lambda: self.step_turn_right(),
-                'shoot': lambda: self.step_shoot_arrow(),
-                'grab': lambda: self.step_grab_gold(),
-                'climb': lambda: self.step_climb_out()
-            }[action]()
+        new_state = self.actions()[action]()
         return new_state
 
     @staticmethod
